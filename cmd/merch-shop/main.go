@@ -1,9 +1,8 @@
 package main
 
 import (
-	cfg "MerchShop/internal/config"
+	"MerchShop/internal/app"
 	"flag"
-	"log"
 )
 
 var (
@@ -17,10 +16,5 @@ func init() {
 func main() {
 	flag.Parse()
 
-	config, err := cfg.NewConfig(configPath)
-	if err != nil {
-		log.Fatal("Error occurred while creating new config")
-	}
-
-	log.Print(config)
+	app.Run(configPath)
 }
