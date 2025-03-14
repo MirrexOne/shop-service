@@ -2,6 +2,7 @@ package app
 
 import (
 	"MerchShop/internal/config"
+	"MerchShop/internal/database"
 	"log"
 )
 
@@ -13,4 +14,14 @@ func Run(configPath string) {
 	}
 
 	log.Print(cfg)
+
+	// Initialize database
+	db, err := database.New(cfg.DB.URL)
+	if err != nil {
+		log.Fatalf("Error occurred while initializing database: %v", db)
+	}
+
+	log.Print("Database successfully initialized")
+
+	defer db.Close()
 }

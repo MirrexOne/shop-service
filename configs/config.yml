@@ -7,3 +7,6 @@ http:
 
 log:
   level: 'debug'
+
+database:
+  url: "postgres://postgres:password@localhost:5432/shop?sslmode=disable"

@@ -11,6 +11,7 @@ type (
 		App  `yaml:"app"`
 		HTTP `yaml:"http"`
 		Log  `yaml:"log"`
+		DB   `yaml:"database"`
 	}
 
 	App struct {
@@ -23,6 +24,10 @@ type (
 
 	Log struct {
 		Level string `yaml:"level"`
+	}
+
+	DB struct {
+		URL string `yaml:"url"`
 	}
 )
 
