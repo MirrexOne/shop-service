@@ -1,9 +1,9 @@
 package app
 
 import (
-	"MerchShop/internal/config"
-	"MerchShop/internal/database"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"shop-service/internal/config"
+	"shop-service/internal/database"
 )
 
 func Run(configPath string) {
@@ -13,7 +13,10 @@ func Run(configPath string) {
 		log.Fatal("Error occurred while creating new config")
 	}
 
-	log.Print(cfg)
+	log.Info("Config successfully parsed")
+
+	// Logger
+	SetLogrus(cfg.Log.Level)
 
 	// Initialize database
 	db, err := database.New(cfg.DB.URL)
@@ -21,7 +24,10 @@ func Run(configPath string) {
 		log.Fatalf("Error occurred while initializing database: %v", db)
 	}
 
-	log.Print("Database successfully initialized")
+	log.Info("Database successfully started")
 
 	defer db.Close()
+
+	log.Info("Starting http server...")
+	log.Debugf("Server port: %s", cfg.Server.Port)
 }

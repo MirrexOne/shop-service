@@ -8,17 +8,17 @@ import (
 
 type (
 	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"log"`
-		DB   `yaml:"database"`
+		App    `yaml:"app"`
+		Server `yaml:"server"`
+		Log    `yaml:"log"`
+		DB     `yaml:"database"`
 	}
 
 	App struct {
 		Name    string `yaml:"name"`
 		Version string `yaml:"version"`
 	}
-	HTTP struct {
+	Server struct {
 		Port string `yaml:"port"`
 	}
 

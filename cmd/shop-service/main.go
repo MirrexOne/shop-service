@@ -1,13 +1,11 @@
 package main
 
 import (
-	"MerchShop/internal/app"
 	"flag"
+	"shop-service/internal/app"
 )
 
-var (
-	configPath string
-)
+var configPath string
 
 func init() {
 	flag.StringVar(&configPath, "config-path", "configs/config.yml", "path to config file")

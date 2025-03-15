@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS merch;
+DROP TABLE IF EXISTS merch_type;

@@ -29,7 +29,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: shop
 #    volumes:
-#       "./migrations/init.sql" - путь к миграциям БД
+      #      "./migrations/init.sql" - путь к миграциям БД
 #      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
