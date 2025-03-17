@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   avito-shop-service:
     build: .
     container_name: avito-shop-service
     ports:
-      - "8080:8080"
+      - "8081:8081"
     environment:
       # енвы подключения к БД
       - DATABASE_PORT=5432

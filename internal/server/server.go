@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -37,6 +38,7 @@ func NewServer(handler http.Handler, opts ...Option) *Server {
 		opt(s)
 	}
 
+	log.Infof("Server started on port: %s", server.Addr)
 	s.start()
 
 	return s
