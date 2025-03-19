@@ -6,14 +6,12 @@ import (
 )
 
 type Router struct {
-	Mux      *http.ServeMux
-	Handlers map[string]http.Handler
+	Mux *http.ServeMux
 }
 
 func New() *Router {
 	return &Router{
-		Mux:      http.DefaultServeMux,
-		Handlers: make(map[string]http.Handler),
+		Mux: http.DefaultServeMux,
 	}
 }
 

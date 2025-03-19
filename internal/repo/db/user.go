@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"shop-service/internal/model"
 )
 
@@ -15,36 +16,28 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 }
 
 func (r *UserRepo) CreateUser(ctx context.Context, user model.User) (int, error) {
+	const op = "repo.db.CreateUser"
+	var id int
+
 	tx, err := r.DB.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelDefault,
 	})
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
-	createStmt := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING ID"
-
-	var id int
-	stmt, err := tx.PrepareContext(ctx, createStmt)
 	if err != nil {
-		return 0, err
-	}
-	defer stmt.Close()
-
-	err = tx.QueryRowContext(ctx, createStmt, user.Username, user.Password).Scan(&id)
-	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%s: begin transaction %w", op, err)
 	}
 
-	_, err = tx.ExecContext(ctx, ""+
-		"INSERT INTO wallet (user_id) VALUES ($1)", id)
-
+	createUser := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING ID"
+	_, err = tx.ExecContext(ctx, createUser, user.Username, user.Password)
 	if err != nil {
-		return 0, err
+		tx.Rollback()
+		return 0, fmt.Errorf("%s: execute create user %w", op, err)
+	}
+
+	createWallet := "INSERT INTO wallet (user_id) VALUES ($1)"
+	_, err = tx.ExecContext(ctx, createWallet, id)
+	if err != nil {
+		tx.Rollback()
+		return 0, fmt.Errorf("%s: execute create wallet %w", op, err)
 	}
 
 	return id, nil
@@ -55,16 +48,10 @@ func (r *UserRepo) GetUserById(ctx context.Context, id int) (*model.User, error)
 
 	var user model.User
 
-	stmt, err := r.DB.PrepareContext(ctx, createStmt)
+	err := r.QueryRowContext(ctx, createStmt, id).Scan(&user)
 	if err != nil {
 		return &user, err
 	}
-
-	err = r.QueryRowContext(ctx, createStmt, id).Scan(&user)
-	if err != nil {
-		return &user, err
-	}
-	defer stmt.Close()
 
 	return &user, nil
 }

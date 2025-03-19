@@ -1,17 +1,20 @@
 package app
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"os"
+	"os/signal"
 	"shop-service/internal/config"
 	v1 "shop-service/internal/controller/http/v1"
 	"shop-service/internal/database"
 	"shop-service/internal/repo"
 	"shop-service/internal/server"
 	"shop-service/internal/service"
+	"syscall"
 )
 
 func Run(configPath string) {
-	notify := make(chan int)
 
 	// Configuration
 	cfg, err := config.NewConfig(configPath)
@@ -44,12 +47,30 @@ func Run(configPath string) {
 
 	log.Info("Initialize handlers and routes")
 
+	// Initialize routes
 	r := v1.New()
-
 	v1.NewRouter(r, services)
 
 	log.Info("Starting http server...")
 	log.Debugf("Server port: %s", cfg.Server.Port)
-	server.NewServer(r.Mux, server.Port(cfg.Server.Port))
-	<-notify
+	srv := server.NewServer(r.Mux, server.Port(cfg.Server.Port))
+
+	// Waiting signal
+	log.Info("Configuring graceful shutdown...")
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case s := <-interrupt:
+		log.Info("app signal: " + s.String())
+	case err = <-srv.Notify():
+		log.Error(fmt.Errorf("server notify: %w", err))
+	}
+
+	// Graceful shutdown
+	log.Info("Shutting down...")
+	err = srv.Shutdown()
+	if err != nil {
+		log.Error(fmt.Errorf("srv.Shutdown: %w", err))
+	}
 }

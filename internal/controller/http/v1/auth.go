@@ -15,7 +15,7 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 		authService: authService,
 	}
 
-	r.Mux.HandleFunc("/auth/sign-up", auth.SignUp)
+	r.Mux.HandleFunc("/api/auth", auth.SignUp)
 }
 
 type signUpInput struct {
@@ -30,7 +30,7 @@ func (auth *authRoute) SignUp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	id, err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
+	_, err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
 		Username: input.Username,
 		Password: input.Password,
 	})
@@ -40,5 +40,4 @@ func (auth *authRoute) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]int{"id": id})
 }
