@@ -30,7 +30,7 @@ func (auth *authRoute) SignUp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	_, err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
+	err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
 		Username: input.Username,
 		Password: input.Password,
 	})

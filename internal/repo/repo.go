@@ -8,8 +8,7 @@ import (
 )
 
 type User interface {
-	CreateUser(ctx context.Context, user model.User) (int, error)
-	GetUserById(ctx context.Context, id int) (*model.User, error)
+	CreateUser(ctx context.Context, user model.User) error
 }
 
 type Repositories struct {

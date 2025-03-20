@@ -14,20 +14,16 @@ func NewAuthService(userRepo repo.User) *AuthService {
 	return &AuthService{userRepo: userRepo}
 }
 
-func (s *AuthService) CreateUser(ctx context.Context, input AuthCreateUserInput) (int, error) {
+func (s *AuthService) CreateUser(ctx context.Context, input AuthCreateUserInput) error {
 	user := model.User{
 		Username: input.Username,
 		Password: input.Password,
 	}
 
-	userId, err := s.userRepo.CreateUser(ctx, user)
+	err := s.userRepo.CreateUser(ctx, user)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return userId, nil
-}
-
-func (s *AuthService) GetUserById(ctx context.Context, id int) (*model.User, error) {
-	return s.userRepo.GetUserById(ctx, id)
+	return nil
 }

@@ -16,7 +16,7 @@ type AuthGenerateTokenInput struct {
 }
 
 type Auth interface {
-	CreateUser(ctx context.Context, input AuthCreateUserInput) (int, error)
+	CreateUser(ctx context.Context, input AuthCreateUserInput) error
 	//GenerateToken(ctx context.Context, input AuthGenerateTokenInput) (string, error)
 	//ParseToken(token string) (int, error)
 }

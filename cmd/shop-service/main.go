@@ -1,18 +1,18 @@
 package main
 
 import (
-	"flag"
 	"shop-service/internal/app"
 )
 
-var configPath string
+var configPath = "configs/config.yml"
 
-func init() {
-	flag.StringVar(&configPath, "config-path", "configs/config.yml", "path to config file")
-}
+//
+//func init() {
+//	flag.StringVar(&configPath, "config-path", "configs/config.yml", "path to config file")
+//}
 
 func main() {
-	flag.Parse()
+	//flag.Parse()
 
 	app.Run(configPath)
 }

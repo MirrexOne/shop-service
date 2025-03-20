@@ -10,3 +10,6 @@ log:
 
 database:
   url: "postgres://postgres:password@localhost:5432/shop?sslmode=disable"
+
+jwt:
+  token_ttl: 120m
