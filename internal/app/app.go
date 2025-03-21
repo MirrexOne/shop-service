@@ -11,6 +11,7 @@ import (
 	"shop-service/internal/repo"
 	"shop-service/internal/server"
 	"shop-service/internal/service"
+	"shop-service/pkg/hasher"
 	"syscall"
 )
 
@@ -19,7 +20,7 @@ func Run(configPath string) {
 	// Configuration
 	cfg, err := config.NewConfig(configPath)
 	if err != nil {
-		log.Fatal("Error occurred while creating new config")
+		log.Fatalf("Error occurred while creating new config: %s", err)
 	}
 
 	log.Info("Config successfully parsed")
@@ -41,7 +42,8 @@ func Run(configPath string) {
 
 	// Services dependencies
 	deps := service.ServicesDependencies{
-		Repos: repositories,
+		Repos:  repositories,
+		Hasher: hasher.NewSHA1Hasher(cfg.Hasher.Salt),
 	}
 	services := service.NewServices(deps)
 

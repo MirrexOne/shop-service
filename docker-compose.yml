@@ -7,6 +7,7 @@ services:
     environment:
       # енвы подключения к БД
       - PG_URL=postgres://postgres:password@db:5432/shop?sslmode=disable
+      - HASHER_SALT=sal;dkfj2@3%(23!09&203
       - DATABASE_PORT=5432
       - DATABASE_USER=postgres
       - DATABASE_PASSWORD=password

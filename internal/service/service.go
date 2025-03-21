@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"shop-service/internal/repo"
+	"shop-service/pkg/hasher"
 )
 
 type AuthCreateUserInput struct {
@@ -26,11 +27,12 @@ type Services struct {
 }
 
 type ServicesDependencies struct {
-	Repos *repo.Repositories
+	Repos  *repo.Repositories
+	Hasher hasher.PasswordHasher
 }
 
 func NewServices(deps ServicesDependencies) *Services {
 	return &Services{
-		Auth: NewAuthService(deps.Repos.User),
+		Auth: NewAuthService(deps.Repos.User, deps.Hasher),
 	}
 }

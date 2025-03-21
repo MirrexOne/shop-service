@@ -11,6 +11,7 @@ type (
 		Server `yaml:"server"`
 		Log    `yaml:"log"`
 		DB     `yaml:"database"`
+		Hasher `yaml:"hasher"`
 	}
 
 	App struct {

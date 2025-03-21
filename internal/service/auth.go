@@ -4,20 +4,25 @@ import (
 	"context"
 	"shop-service/internal/model"
 	"shop-service/internal/repo"
+	"shop-service/pkg/hasher"
 )
 
 type AuthService struct {
-	userRepo repo.User
+	userRepo       repo.User
+	passwordHasher hasher.PasswordHasher
 }
 
-func NewAuthService(userRepo repo.User) *AuthService {
-	return &AuthService{userRepo: userRepo}
+func NewAuthService(userRepo repo.User, passwordHasher hasher.PasswordHasher) *AuthService {
+	return &AuthService{
+		userRepo:       userRepo,
+		passwordHasher: passwordHasher,
+	}
 }
 
 func (s *AuthService) CreateUser(ctx context.Context, input AuthCreateUserInput) error {
 	user := model.User{
 		Username: input.Username,
-		Password: input.Password,
+		Password: s.passwordHasher.Hash(input.Password),
 	}
 
 	err := s.userRepo.CreateUser(ctx, user)
