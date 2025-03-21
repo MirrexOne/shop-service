@@ -1,11 +1,24 @@
-FROM golang:1.24
+# Step 1: Modules caching
+FROM golang:alpine AS modules
+COPY go.mod go.sum /modules/
+WORKDIR /modules
+RUN go mod download
 
-WORKDIR ${GOPATH}/avito-shop/
-COPY . ${GOPATH}/avito-shop/
+# Step 2: Builder
+FROM golang:alpine AS builder
+COPY --from=modules /go/pkg /go/pkg
+COPY . /app
+WORKDIR /app
 
-RUN go build -o /build ./internal/app \
-    && go clean -cache -modcache
+RUN if [ -f "/app/configs/config.yml" ]; then echo "File exists in builder"; else echo "File does not exist in builder" && exit 1; fi
 
-EXPOSE 8081
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -tags migrate -o /bin/app ./cmd/shop-service
 
-CMD ["/build"]
+# Step 3: Final
+FROM scratch
+COPY --from=builder /app/configs /configs
+COPY --from=builder /app/migrations /migrations
+COPY --from=builder /bin/app /app
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+CMD ["/app"]
