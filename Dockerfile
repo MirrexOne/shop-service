@@ -9,11 +9,8 @@ FROM golang:alpine AS builder
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
-
-RUN if [ -f "/app/configs/config.yml" ]; then echo "File exists in builder"; else echo "File does not exist in builder" && exit 1; fi
-
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -tags migrate -o /bin/app ./cmd/shop-service
+    go build -tags migrate -o /bin/app ./cmd/shop-service \
 
 # Step 3: Final
 FROM scratch
