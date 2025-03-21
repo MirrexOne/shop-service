@@ -4,6 +4,7 @@ package app
 
 import (
 	"errors"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
@@ -20,9 +21,10 @@ const (
 )
 
 func init() {
-	databaseURL, ok := os.LookupEnv("PG_URL")
+	godotenv.Load()
+	databaseURL, ok := os.LookupEnv("PG_URL_LOCALHOST")
 	if !ok || len(databaseURL) == 0 {
-		log.Fatalf("Migrate: environment variable not declared: PG_URL")
+		log.Info("Migrate: environment variable not declared: PG_URL_LOCALHOST")
 	}
 
 	if !strings.Contains(databaseURL, "?sslmode=disable") {
