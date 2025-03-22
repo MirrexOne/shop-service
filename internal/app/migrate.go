@@ -21,7 +21,8 @@ const (
 )
 
 func init() {
-	godotenv.Load()
+	godotenv.Load(".env")
+
 	databaseURL, ok := os.LookupEnv("PG_URL")
 	if !ok || len(databaseURL) == 0 {
 		log.Info("Migrate: environment variable not declared: PG_URL")

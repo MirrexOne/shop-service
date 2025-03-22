@@ -15,7 +15,7 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 		authService: authService,
 	}
 
-	r.Mux.HandleFunc("/api/auth", auth.SignUp)
+	r.Mux.HandleFunc("/api/auth", auth.SignUp).Methods("POST")
 }
 
 type signUpInput struct {

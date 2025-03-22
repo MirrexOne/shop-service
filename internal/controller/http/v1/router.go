@@ -1,17 +1,17 @@
 package v1
 
 import (
-	"net/http"
+	"github.com/gorilla/mux"
 	"shop-service/internal/service"
 )
 
 type Router struct {
-	Mux *http.ServeMux
+	Mux *mux.Router
 }
 
 func New() *Router {
 	return &Router{
-		Mux: http.DefaultServeMux,
+		Mux: mux.NewRouter(),
 	}
 }
 
