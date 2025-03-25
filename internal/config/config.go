@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
+	"time"
 )
 
 type (
@@ -12,6 +13,7 @@ type (
 		Log    `yaml:"log"`
 		DB     `yaml:"database"`
 		Hasher `yaml:"hasher"`
+		JWT    `yaml:"jwt"`
 	}
 
 	App struct {
@@ -32,6 +34,11 @@ type (
 
 	Hasher struct {
 		Salt string `env-required:"true" env:"HASHER_SALT"`
+	}
+
+	JWT struct {
+		SignKey  string        `env-required:"true"                  env:"JWT_SIGN_KEY"`
+		TokenTTL time.Duration `env-required:"true" yaml:"token_ttl" env:"JWT_TOKEN_TTL"`
 	}
 )
 

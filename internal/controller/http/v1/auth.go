@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"shop-service/internal/service"
 )
@@ -15,7 +16,8 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 		authService: authService,
 	}
 
-	r.Mux.HandleFunc("/api/auth", auth.SignUp).Methods("POST")
+	r.Mux.HandleFunc("/api/auth", auth.signUp).Methods("POST")
+	r.Mux.HandleFunc("/api/login", auth.signIn).Methods("POST")
 }
 
 type signUpInput struct {
@@ -23,21 +25,71 @@ type signUpInput struct {
 	Password string `json:"password"`
 }
 
-func (auth *authRoute) SignUp(w http.ResponseWriter, r *http.Request) {
+func (auth *authRoute) signUp(w http.ResponseWriter, r *http.Request) {
 	var input signUpInput
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
 	}
 
-	err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
+	userId, err := auth.authService.CreateUser(r.Context(), service.AuthCreateUserInput{
 		Username: input.Username,
 		Password: input.Password,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, service.ErrUserAlreadyExists) {
+			json.NewEncoder(w).Encode(newErrorResponse(http.StatusBadRequest, err.Error()))
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+
+	type response struct {
+		Code int `json:"code"`
+		Id   int `json:"id"`
+	}
+
+	json.NewEncoder(w).Encode(response{
+		Code: http.StatusCreated,
+		Id:   userId,
+	})
+}
+
+type signInInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (auth *authRoute) signIn(w http.ResponseWriter, r *http.Request) {
+	var input signInInput
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	token, err := auth.authService.GenerateToken(r.Context(), service.AuthGenerateTokenInput{
+		Username: input.Username,
+		Password: input.Password,
+	})
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			http.Error(w, "invalid username or password", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	type response struct {
+		Code  int    `json:"code"`
+		Token string `json:"token"`
+	}
+
+	json.NewEncoder(w).Encode(response{
+		Code:  http.StatusOK,
+		Token: token,
+	})
 }

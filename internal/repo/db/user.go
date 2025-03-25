@@ -3,8 +3,10 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"shop-service/internal/model"
+	"shop-service/internal/repo/repoerrs"
 )
 
 type UserRepo struct {
@@ -15,14 +17,14 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 	return &UserRepo{db}
 }
 
-func (r *UserRepo) CreateUser(ctx context.Context, user model.User) error {
+func (r *UserRepo) CreateUser(ctx context.Context, user model.User) (int, error) {
 	const op = "repo.db.CreateUser"
 
 	tx, err := r.DB.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelDefault,
 	})
 	if err != nil {
-		return fmt.Errorf("%s: begin transaction %w", op, err)
+		return 0, fmt.Errorf("%s: begin transaction %w", op, err)
 	}
 
 	defer func() {
@@ -42,27 +44,39 @@ func (r *UserRepo) CreateUser(ctx context.Context, user model.User) error {
 	createUser := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING ID"
 	err = tx.QueryRowContext(ctx, createUser, user.Username, user.Password).Scan(&userId)
 	if err != nil {
-		return fmt.Errorf("creating user: %w", err)
+		return 0, fmt.Errorf("creating user: %w", err)
 	}
 
 	createWallet := "INSERT INTO wallet (user_id) VALUES ($1)"
 	_, err = tx.ExecContext(ctx, createWallet, userId)
 	if err != nil {
-		return fmt.Errorf("creating wallet: %w", err)
+		return 0, fmt.Errorf("creating wallet: %w", err)
 	}
 
-	return nil
+	return userId, nil
 }
 
-func (r *UserRepo) GetUserById(ctx context.Context, id int) (*model.User, error) {
-	createStmt := "SELECT * FROM users WHERE id = ?"
+func (r *UserRepo) GetUserByUsernameAndPassword(ctx context.Context, username, password string) (model.User, error) {
+	query := `
+	SELECT id, username, password, created_at
+	FROM users u
+	WHERE username = $1 AND password = $2
+	`
 
 	var user model.User
 
-	err := r.QueryRowContext(ctx, createStmt, id).Scan(&user)
+	err := r.QueryRowContext(ctx, query, username, password).Scan(
+		&user.Id,
+		&user.Username,
+		&user.Password,
+		&user.CreatedAt,
+	)
 	if err != nil {
-		return &user, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.User{}, repoerrs.ErrNotFound
+		}
+		return model.User{}, fmt.Errorf("UserRepo.GetUserByUsernameAndPassword - r.Pool.QueryRowContext: %v", err)
 	}
 
-	return &user, nil
+	return user, nil
 }
