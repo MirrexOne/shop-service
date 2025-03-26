@@ -15,9 +15,12 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 	auth := &authRoute{
 		authService: authService,
 	}
+	subrouter := r.Mux.PathPrefix("/api/login").Subrouter()
+	authMiddleware := NewAuthMiddleware(authService)
+	subrouter.Use(authMiddleware.AuthMiddleware)
 
 	r.Mux.HandleFunc("/api/auth", auth.signUp).Methods("POST")
-	r.Mux.HandleFunc("/api/login", auth.signIn).Methods("POST")
+	subrouter.HandleFunc("/api/login", auth.signIn).Methods("POST")
 }
 
 type signUpInput struct {
@@ -43,6 +46,20 @@ func (auth *authRoute) signUp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 
+	token, err := auth.authService.GenerateToken(r.Context(), service.AuthGenerateTokenInput{
+		Username: input.Username,
+		Password: input.Password,
+	})
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) {
+			http.Error(w, "invalid username or password", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Authorization", "Bearer "+token)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
@@ -70,26 +87,4 @@ func (auth *authRoute) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.authService.GenerateToken(r.Context(), service.AuthGenerateTokenInput{
-		Username: input.Username,
-		Password: input.Password,
-	})
-	if err != nil {
-		if errors.Is(err, service.ErrUserNotFound) {
-			http.Error(w, "invalid username or password", http.StatusBadRequest)
-			return
-		}
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	type response struct {
-		Code  int    `json:"code"`
-		Token string `json:"token"`
-	}
-
-	json.NewEncoder(w).Encode(response{
-		Code:  http.StatusOK,
-		Token: token,
-	})
 }

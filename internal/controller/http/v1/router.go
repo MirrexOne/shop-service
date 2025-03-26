@@ -6,19 +6,17 @@ import (
 )
 
 type Router struct {
-	Mux *mux.Router
+	Mux        *mux.Router
+	Middleware AuthMiddleware
 }
 
 func New() *Router {
 	return &Router{
-		Mux: mux.NewRouter(),
+		Mux:        mux.NewRouter(),
+		Middleware: AuthMiddleware{},
 	}
 }
 
 func NewRouter(router *Router, services *service.Services) {
-	authMiddleware := &AuthMiddleware{services.Auth}
-
 	newAuthRoutes(router, services.Auth)
-
-	router.Mux.Use(authMiddleware.AuthMiddleware)
 }
