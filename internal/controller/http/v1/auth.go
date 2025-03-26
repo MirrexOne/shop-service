@@ -15,12 +15,12 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 	auth := &authRoute{
 		authService: authService,
 	}
-	subrouter := r.Mux.PathPrefix("/api/login").Subrouter()
+	secureRouter := r.Mux.PathPrefix("/api/login").Subrouter()
 	authMiddleware := NewAuthMiddleware(authService)
-	subrouter.Use(authMiddleware.AuthMiddleware)
+	secureRouter.Use(authMiddleware.AuthMiddleware)
 
 	r.Mux.HandleFunc("/api/auth", auth.signUp).Methods("POST")
-	subrouter.HandleFunc("/api/login", auth.signIn).Methods("POST")
+	secureRouter.HandleFunc("/api/login", auth.signIn).Methods("POST")
 }
 
 type signUpInput struct {
