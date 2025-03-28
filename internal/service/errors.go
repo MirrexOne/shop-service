@@ -10,4 +10,6 @@ var (
 
 	ErrCannotSingToken  = fmt.Errorf("cannot sign token")
 	ErrCannotParseToken = fmt.Errorf("cannot parse token")
+
+	ErrInvalidPassword = fmt.Errorf("invalid password")
 )

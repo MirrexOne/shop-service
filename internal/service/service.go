@@ -17,6 +17,11 @@ type AuthGenerateTokenInput struct {
 	Password string
 }
 
+type SignInInput struct {
+	Username string
+	Password string
+}
+
 type Auth interface {
 	CreateUser(ctx context.Context, input AuthCreateUserInput) (int, error)
 	GenerateToken(ctx context.Context, input AuthGenerateTokenInput) (string, error)

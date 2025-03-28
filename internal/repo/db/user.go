@@ -58,24 +58,19 @@ func (r *UserRepo) CreateUser(ctx context.Context, user model.User) (int, error)
 
 func (r *UserRepo) GetUserByUsernameAndPassword(ctx context.Context, username, password string) (model.User, error) {
 	query := `
-	SELECT id, username, password, created_at
+	SELECT u
 	FROM users u
 	WHERE username = $1 AND password = $2
 	`
 
 	var user model.User
 
-	err := r.QueryRowContext(ctx, query, username, password).Scan(
-		&user.Id,
-		&user.Username,
-		&user.Password,
-		&user.CreatedAt,
-	)
+	err := r.QueryRowContext(ctx, query, username, password).Scan(&user)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, repoerrs.ErrNotFound
 		}
-		return model.User{}, fmt.Errorf("UserRepo.GetUserByUsernameAndPassword - r.Pool.QueryRowContext: %v", err)
+		return model.User{}, fmt.Errorf("UserRepo.GetUserByUsernameAndPassword - r.QueryRowContext: %v", err)
 	}
 
 	return user, nil

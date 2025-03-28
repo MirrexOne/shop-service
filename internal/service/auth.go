@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 	"shop-service/internal/model"
 	"shop-service/internal/repo"
 	"shop-service/internal/repo/repoerrs"
 	"shop-service/pkg/hasher"
+	"strings"
 	"time"
 )
 
@@ -98,4 +100,18 @@ func (s *AuthService) ParseToken(accessToken string) (int, error) {
 	}
 
 	return claims.UserId, nil
+}
+
+func (s *AuthService) SignInUser(ctx context.Context, username, password string) error {
+	user, err := s.userRepo.GetUserByUsernameAndPassword(ctx, username, password)
+	if err != nil || errors.Is(err, repoerrs.ErrNotFound) {
+		return ErrUserNotFound
+	}
+
+	isValidUsername := strings.EqualFold(username, user.Username)
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil || !isValidUsername {
+		return ErrInvalidUsernameOrPassword
+	}
+
 }
