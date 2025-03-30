@@ -11,5 +11,7 @@ log:
 database:
   url: "postgres://postgres:password@localhost:5432/shop?sslmode=disable"
 
+sign_key: 643c83580e48222810c742c705fb5faaa02f66bb0b6f99ad3046fe485f95837ed9d84aca1e7e1d05e2e4fd826136ce85af9043f
+
 jwt:
   token_ttl: 120m

@@ -37,7 +37,7 @@ type (
 	}
 
 	JWT struct {
-		SignKey  string        `env-required:"true"                  env:"JWT_SIGN_KEY"`
+		SignKey  string        `env-required:"true" yaml:"sign_key"  env:"JWT_SIGN_KEY"`
 		TokenTTL time.Duration `env-required:"true" yaml:"token_ttl" env:"JWT_TOKEN_TTL"`
 	}
 )

@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"shop-service/internal/service"
@@ -27,14 +28,14 @@ func (h *AuthMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 		token, ok := bearerToken(r)
 		if !ok {
 			log.Errorf("AuthMiddleware: bearerToken: %v", ErrInvalidAuthHeader)
-			newErrorResponse(http.StatusUnauthorized, ErrInvalidAuthHeader.Error())
+			json.NewEncoder(w).Encode(newErrorResponse(http.StatusUnauthorized, ErrInvalidAuthHeader.Error()))
 			return
 		}
 
 		userId, err := h.authService.ParseToken(token)
 		if err != nil {
 			log.Errorf("AuthMiddleware: h.authService.ParseToken: %v", err)
-			newErrorResponse(http.StatusUnauthorized, ErrCannotParseToken.Error())
+			json.NewEncoder(w).Encode(newErrorResponse(http.StatusUnauthorized, ErrCannotParseToken.Error()))
 			return
 		}
 

@@ -42,8 +42,10 @@ func Run(configPath string) {
 
 	// Services dependencies
 	deps := service.ServicesDependencies{
-		Repos:  repositories,
-		Hasher: hasher.NewSHA1Hasher(cfg.Hasher.Salt),
+		Repos:    repositories,
+		Hasher:   hasher.NewSHA1Hasher(cfg.Hasher.Salt),
+		SignKey:  cfg.SignKey,
+		TokenTTL: cfg.TokenTTL,
 	}
 	services := service.NewServices(deps)
 

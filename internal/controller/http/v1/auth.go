@@ -20,7 +20,7 @@ func newAuthRoutes(r *Router, authService service.Auth) {
 	secureRouter.Use(authMiddleware.AuthMiddleware)
 
 	r.Mux.HandleFunc("/api/auth", auth.signUp).Methods("POST")
-	secureRouter.HandleFunc("/api/login", auth.signIn).Methods("POST")
+	secureRouter.HandleFunc("", auth.signIn).Methods("POST")
 }
 
 type signUpInput struct {
@@ -67,7 +67,6 @@ func (auth *authRoute) signUp(w http.ResponseWriter, r *http.Request) {
 		Code int `json:"code"`
 		Id   int `json:"id"`
 	}
-
 	json.NewEncoder(w).Encode(response{
 		Code: http.StatusCreated,
 		Id:   userId,
@@ -87,4 +86,13 @@ func (auth *authRoute) signIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err := auth.authService.SignInUser(r.Context(), input.Username, input.Password)
+	if err != nil {
+		json.NewEncoder(w).Encode(err)
+		w.Write([]byte("error while signing in"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("login successfully"))
 }

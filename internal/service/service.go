@@ -26,6 +26,7 @@ type Auth interface {
 	CreateUser(ctx context.Context, input AuthCreateUserInput) (int, error)
 	GenerateToken(ctx context.Context, input AuthGenerateTokenInput) (string, error)
 	ParseToken(token string) (int, error)
+	SignInUser(ctx context.Context, username, password string) error
 }
 
 type Services struct {

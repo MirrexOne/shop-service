@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"shop-service/internal/app"
 )
 
@@ -14,5 +15,6 @@ var configPath = "configs/config.yml"
 func main() {
 	//flag.Parse()
 
+	godotenv.Load()
 	app.Run(configPath)
 }
